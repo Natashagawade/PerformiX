@@ -93,6 +93,7 @@ model User {
   managerId    String?
   googleId     String?    @unique
   authProvider String     @default("credentials")
+  phoneNumber  String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

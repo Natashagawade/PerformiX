@@ -22,19 +22,21 @@ export async function GET(req: NextRequest) {
     const code = searchParams.get('code')
     const error = searchParams.get('error')
 
+    const origin = new URL(req.url).origin
+    const loginUrl = `${origin}/auth/login`
+
     if (error || !code) {
-      return NextResponse.redirect(new URL('/auth/login?error=google_denied', req.url))
+      return NextResponse.redirect(`${loginUrl}?error=google_denied`)
     }
 
     const clientId = process.env.GOOGLE_CLIENT_ID
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET
-    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback/google`
+    const redirectUri = `${origin}/api/auth/callback/google`
 
     if (!clientId || !clientSecret) {
-      return NextResponse.redirect(new URL('/auth/login?error=google_not_configured', req.url))
+      return NextResponse.redirect(`${loginUrl}?error=google_not_configured`)
     }
 
-    // Exchange code for tokens
     const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -49,27 +51,25 @@ export async function GET(req: NextRequest) {
 
     if (!tokenRes.ok) {
       console.error('Google token exchange failed:', await tokenRes.text())
-      return NextResponse.redirect(new URL('/auth/login?error=google_token_failed', req.url))
+      return NextResponse.redirect(`${loginUrl}?error=google_token_failed`)
     }
 
     const tokens: GoogleTokenResponse = await tokenRes.json()
 
-    // Get user info
     const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
       headers: { Authorization: `Bearer ${tokens.access_token}` },
     })
 
     if (!userInfoRes.ok) {
-      return NextResponse.redirect(new URL('/auth/login?error=google_userinfo_failed', req.url))
+      return NextResponse.redirect(`${loginUrl}?error=google_userinfo_failed`)
     }
 
     const googleUser: GoogleUserInfo = await userInfoRes.json()
 
     if (!googleUser.email_verified) {
-      return NextResponse.redirect(new URL('/auth/login?error=email_not_verified', req.url))
+      return NextResponse.redirect(`${loginUrl}?error=email_not_verified`)
     }
 
-    // Find or create user
     let user = await prisma.user.findFirst({
       where: {
         OR: [
@@ -80,7 +80,6 @@ export async function GET(req: NextRequest) {
     })
 
     if (user) {
-      // Link Google account if not already linked
       if (!user.googleId) {
         user = await prisma.user.update({
           where: { id: user.id },
@@ -92,7 +91,6 @@ export async function GET(req: NextRequest) {
         })
       }
     } else {
-      // Create new user with Google auth
       user = await prisma.user.create({
         data: {
           email: googleUser.email,
@@ -100,11 +98,10 @@ export async function GET(req: NextRequest) {
           googleId: googleUser.sub,
           authProvider: 'google',
           avatarUrl: googleUser.picture,
-          role: 'EMPLOYEE', // Default role for new Google users
+          role: 'EMPLOYEE',
         },
       })
 
-      // Create welcome notification
       await prisma.notification.create({
         data: {
           userId: user.id,
@@ -115,13 +112,13 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    // Issue JWT
     const token = signToken({ userId: user.id, role: user.role })
-    const res = NextResponse.redirect(new URL('/dashboard', req.url))
+    const res = NextResponse.redirect(`${origin}/dashboard`)
     res.cookies.set(COOKIE_NAME, token, COOKIE_OPTIONS)
     return res
   } catch (err) {
     console.error('Google OAuth callback error:', err)
-    return NextResponse.redirect(new URL('/auth/login?error=google_auth_failed', req.url))
+    const origin = new URL(req.url).origin
+    return NextResponse.redirect(`${origin}/auth/login?error=google_auth_failed`)
   }
 }

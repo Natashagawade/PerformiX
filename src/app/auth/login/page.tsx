@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
-import { Eye, EyeOff, Loader2, Target } from 'lucide-react'
+import { Eye, EyeOff, Loader2, Target, Zap, Shield, BarChart3 } from 'lucide-react'
 
 const schema = z.object({
   email: z.string().email('Invalid email address'),
@@ -15,20 +15,21 @@ const schema = z.object({
 })
 type FormData = z.infer<typeof schema>
 
-const DEMO_ACCOUNTS = [
-  { label: 'Employee', email: 'employee@performix.com', role: 'Employee · Sales' },
-  { label: 'Manager', email: 'manager@performix.com', role: 'Manager · Sales' },
-  { label: 'Admin / HR', email: 'admin@performix.com', role: 'Admin · HR Dept' },
-]
-
 const GOOGLE_ERRORS: Record<string, string> = {
   google_denied: 'Google sign-in was cancelled.',
-  google_not_configured: 'Google sign-in is not configured. Contact admin.',
+  google_not_configured: 'Google sign-in is not configured. Contact your admin.',
   google_token_failed: 'Google authentication failed. Please try again.',
   google_userinfo_failed: 'Could not retrieve Google account info.',
   email_not_verified: 'Your Google email is not verified.',
   google_auth_failed: 'Google sign-in failed. Please try again.',
 }
+
+const FEATURES = [
+  { icon: Target, text: 'Role-based dashboards for employees, managers & HR' },
+  { icon: BarChart3, text: 'Quarterly check-ins with real-time progress scoring' },
+  { icon: Zap, text: 'AI-powered goal insights and recommendations' },
+  { icon: Shield, text: 'Secure, enterprise-grade access control' },
+]
 
 export default function LoginPage() {
   return (
@@ -49,11 +50,10 @@ function LoginContent() {
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
 
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
 
-  // Handle Google OAuth errors from redirect
   useEffect(() => {
     const error = searchParams.get('error')
     if (error && GOOGLE_ERRORS[error]) {
@@ -70,7 +70,10 @@ function LoginContent() {
         body: JSON.stringify(data),
       })
       const json = await res.json()
-      if (!res.ok) { toast.error(json.error || 'Login failed'); return }
+      if (!res.ok) {
+        toast.error(json.error || 'Login failed')
+        return
+      }
       toast.success('Welcome back!')
       router.push('/dashboard')
       router.refresh()
@@ -88,7 +91,7 @@ function LoginContent() {
 
   return (
     <div className="min-h-screen bg-[#f8f8f8] flex items-center justify-center p-4">
-      <div className="w-full max-w-[900px] grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+      <div className="w-full max-w-[900px] grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
 
         {/* Left — branding */}
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4 }}>
@@ -109,11 +112,13 @@ function LoginContent() {
             Enterprise-grade goal setting and tracking for modern organizations. Set meaningful objectives, track achievements, and celebrate progress.
           </p>
 
-          <div className="space-y-2">
-            {['Role-based dashboards for employees, managers & HR', 'Quarterly check-ins with progress scoring', 'AI-powered goal insights and recommendations', 'Organization-wide analytics and reporting'].map((f) => (
-              <div key={f} className="flex items-center gap-2.5 text-sm text-[#444]">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#111] flex-shrink-0" />
-                {f}
+          <div className="space-y-3">
+            {FEATURES.map(({ icon: Icon, text }) => (
+              <div key={text} className="flex items-center gap-3 text-sm text-[#444]">
+                <div className="w-7 h-7 rounded-lg bg-[#f0f0f0] flex items-center justify-center flex-shrink-0">
+                  <Icon className="w-3.5 h-3.5 text-[#555]" />
+                </div>
+                {text}
               </div>
             ))}
           </div>
@@ -127,7 +132,7 @@ function LoginContent() {
               <p className="text-sm text-[#777]">Access your PerformiX workspace</p>
             </div>
 
-            {/* Google Sign-In Button */}
+            {/* Google Sign-In */}
             <button
               type="button"
               onClick={handleGoogleLogin}
@@ -153,49 +158,54 @@ function LoginContent() {
               <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-3 text-[10px] text-[#aaa] uppercase tracking-wider">or sign in with email</span>
             </div>
 
-            {/* Demo accounts */}
-            <div className="mb-5">
-              <div className="text-[10px] font-semibold text-[#aaa] uppercase tracking-wider mb-2">Demo accounts</div>
-              <div className="grid grid-cols-3 gap-2">
-                {DEMO_ACCOUNTS.map((a) => (
-                  <button
-                    key={a.email}
-                    type="button"
-                    onClick={() => { setValue('email', a.email); setValue('password', 'GoalSync123') }}
-                    className="p-2.5 border border-[#e5e5e5] rounded-lg text-left hover:border-[#d4d4d4] hover:bg-[#f8f8f8] transition-all"
-                  >
-                    <div className="text-[11px] font-medium text-[#111]">{a.label}</div>
-                    <div className="text-[10px] text-[#999] mt-0.5 truncate">{a.role}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div>
                 <label className="label">Email address</label>
-                <input {...register('email')} type="email" className="input" placeholder="you@company.com" autoComplete="email" />
+                <input
+                  {...register('email')}
+                  type="email"
+                  className="input"
+                  placeholder="you@company.com"
+                  autoComplete="email"
+                />
                 {errors.email && <p className="text-[11px] text-[#dc2626] mt-1">{errors.email.message}</p>}
               </div>
 
               <div>
                 <label className="label">Password</label>
                 <div className="relative">
-                  <input {...register('password')} type={showPass ? 'text' : 'password'} className="input pr-10" placeholder="••••••••" autoComplete="current-password" />
-                  <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#aaa] hover:text-[#777]">
+                  <input
+                    {...register('password')}
+                    type={showPass ? 'text' : 'password'}
+                    className="input pr-10"
+                    placeholder="••••••••"
+                    autoComplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPass(!showPass)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#aaa] hover:text-[#777]"
+                  >
                     {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
                 {errors.password && <p className="text-[11px] text-[#dc2626] mt-1">{errors.password.message}</p>}
               </div>
 
-              <button type="submit" disabled={loading} className="btn-primary w-full justify-center py-2.5 mt-2">
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary w-full justify-center py-2.5 mt-2"
+              >
                 {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Signing in…</> : 'Sign in to PerformiX'}
               </button>
             </form>
 
-            <p className="text-[11px] text-[#aaa] text-center mt-4">
-              Demo password: <code className="bg-[#f2f2f2] px-1.5 py-0.5 rounded text-[#444]">GoalSync123</code>
+            <p className="text-[11px] text-[#aaa] text-center mt-5">
+              First time?{' '}
+              <a href="/auth/setup" className="text-[#555] underline underline-offset-2 hover:text-[#111] transition-colors">
+                Set up your workspace
+              </a>
             </p>
           </div>
         </motion.div>
@@ -203,4 +213,3 @@ function LoginContent() {
     </div>
   )
 }
-

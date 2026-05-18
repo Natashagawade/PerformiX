@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Search, LockOpen } from 'lucide-react'
+import { Search, LockOpen, Download } from 'lucide-react'
 import { calculateProgress, getProgressBarClass, getInitials } from '@/lib/utils'
 
 interface Member {
@@ -19,12 +19,6 @@ export default function TeamClient({ members, userRole }: Props) {
 
   const depts = ['ALL', ...Array.from(new Set(members.map(m => m.department?.name || 'Unknown')))]
 
-  const filtered = members.filter(m => {
-    const matchSearch = m.name.toLowerCase().includes(search.toLowerCase()) || m.email.toLowerCase().includes(search.toLowerCase())
-    const matchDept = deptFilter === 'ALL' || m.department?.name === deptFilter
-    return matchSearch && matchDept
-  })
-
   const getCompletion = (m: Member) => {
     if (!m.goals.length) return 0
     return Math.round(m.goals.reduce((a, g) => {
@@ -33,11 +27,41 @@ export default function TeamClient({ members, userRole }: Props) {
     }, 0) / m.goals.length)
   }
 
+  const filtered = members.filter(m => {
+    const matchSearch = m.name.toLowerCase().includes(search.toLowerCase()) || m.email.toLowerCase().includes(search.toLowerCase())
+    const matchDept = deptFilter === 'ALL' || m.department?.name === deptFilter
+    return matchSearch && matchDept
+  })
+
+  const handleExportCSV = () => {
+    const headers = ['Name', 'Email', 'Department', 'Role', 'Total Goals', 'Completion %']
+    const rows = filtered.map(m => [
+      m.name, m.email, m.department?.name || 'N/A', m.role, m.goals.length, getCompletion(m)
+    ])
+    
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(r => r.join(','))
+    ].join('\n')
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = `performix_team_report_${new Date().toISOString().split('T')[0]}.csv`
+    link.click()
+    toast.success('Report downloaded')
+  }
+
   return (
     <div className="p-6 max-w-5xl">
-      <div className="mb-5">
-        <h1 className="text-[18px] font-semibold text-[#111] tracking-tight">{userRole === 'ADMIN' ? 'All Employees' : 'My Team'}</h1>
-        <p className="text-[12px] text-[#aaa] mt-1">{members.length} {userRole === 'ADMIN' ? 'employees' : 'direct reports'}</p>
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <h1 className="text-[18px] font-semibold text-[#111] tracking-tight">{userRole === 'ADMIN' ? 'All Employees' : 'My Team'}</h1>
+          <p className="text-[12px] text-[#aaa] mt-1">{members.length} {userRole === 'ADMIN' ? 'employees' : 'direct reports'}</p>
+        </div>
+        <button onClick={handleExportCSV} className="btn-secondary btn-sm flex items-center gap-2">
+          <Download className="w-3.5 h-3.5" /> Export Report
+        </button>
       </div>
 
       <div className="flex gap-3 mb-4">

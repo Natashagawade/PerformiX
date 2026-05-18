@@ -1,14 +1,16 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Plus, Send, AlertTriangle } from 'lucide-react'
+import { Plus, Send, AlertTriangle, Loader2 } from 'lucide-react'
 
 interface Cycle { id: string; name: string; phase: string; status: string; startDate: string; endDate: string }
+interface Department { id: string; name: string }
 interface User { id: string; name: string; email: string; role: string; department?: { name: string } }
 interface Escalation { id: string; reason: string; status: string; user: { name: string } }
 
-interface Props { cycles: Cycle[]; users: User[]; escalations: Escalation[] }
+interface Props { cycles: Cycle[]; users: User[]; escalations: Escalation[]; departments: Department[] }
 
 const ESCALATION_RULES = [
   { rule: 'Goal not submitted', trigger: 'After 5 days of cycle opening', chain: 'Employee → Manager' },
@@ -16,10 +18,48 @@ const ESCALATION_RULES = [
   { rule: 'Q check-in overdue', trigger: 'After 7 days of window open', chain: 'Employee → Manager → HR' },
 ]
 
-export default function SettingsClient({ cycles, users, escalations }: Props) {
-  const [tab, setTab] = useState<'cycles' | 'users' | 'escalations' | 'shared'>('cycles')
+export default function SettingsClient({ cycles, users, escalations, departments }: Props) {
+  const router = useRouter()
+  const [tab, setTab] = useState<'cycles' | 'users' | 'escalations' | 'shared'>('users')
   const [sharedGoalTitle, setSharedGoalTitle] = useState('')
   const [sharedDept, setSharedDept] = useState('ALL')
+  
+  // Add User State
+  const [showAddUser, setShowAddUser] = useState(false)
+  const [isAdding, setIsAdding] = useState(false)
+  const [newUser, setNewUser] = useState({
+    name: '',
+    email: '',
+    password: '',
+    role: 'EMPLOYEE',
+    departmentId: '',
+    managerId: ''
+  })
+
+  const managers = users.filter(u => u.role === 'MANAGER' || u.role === 'ADMIN')
+
+  const handleAddUser = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsAdding(true)
+    try {
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newUser)
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to add user')
+      
+      toast.success('User created successfully')
+      setShowAddUser(false)
+      setNewUser({ name: '', email: '', password: '', role: 'EMPLOYEE', departmentId: '', managerId: '' })
+      router.refresh()
+    } catch (err: any) {
+      toast.error(err.message)
+    } finally {
+      setIsAdding(false)
+    }
+  }
 
   return (
     <div className="p-6 max-w-4xl">
@@ -28,7 +68,6 @@ export default function SettingsClient({ cycles, users, escalations }: Props) {
         <p className="text-[12px] text-[#aaa] mt-1">Manage cycles, users, escalations, and shared goals</p>
       </div>
 
-      {/* Tabs */}
       <div className="flex gap-1 mb-5">
         {(['cycles', 'users', 'escalations', 'shared'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
@@ -38,7 +77,6 @@ export default function SettingsClient({ cycles, users, escalations }: Props) {
         ))}
       </div>
 
-      {/* Cycles */}
       {tab === 'cycles' && (
         <div className="space-y-3">
           <div className="flex justify-end">
@@ -58,30 +96,103 @@ export default function SettingsClient({ cycles, users, escalations }: Props) {
         </div>
       )}
 
-      {/* Users */}
       {tab === 'users' && (
-        <div className="bg-white border border-[#e5e5e5] rounded-xl overflow-hidden" style={{ boxShadow: '0 1px 3px rgba(0,0,0,.04)' }}>
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-[#f2f2f2]">
-                {['Name', 'Email', 'Role', 'Department'].map(h => <th key={h} className="table-header">{h}</th>)}
-              </tr>
-            </thead>
-            <tbody>
-              {users.map(u => (
-                <tr key={u.id} className="hover:bg-[#fafafa]">
-                  <td className="table-cell font-medium text-[#111]">{u.name}</td>
-                  <td className="table-cell text-[#777]">{u.email}</td>
-                  <td className="table-cell"><span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${u.role === 'ADMIN' ? 'bg-[#111] text-white border-[#111]' : u.role === 'MANAGER' ? 'bg-[#f8f8f8] text-[#444] border-[#e5e5e5]' : 'bg-[#f2f2f2] text-[#777] border-[#e5e5e5]'}`}>{u.role.toLowerCase()}</span></td>
-                  <td className="table-cell text-[#777]">{u.department?.name || '—'}</td>
+        <div className="space-y-4">
+          {!showAddUser ? (
+            <div className="flex justify-end">
+              <button onClick={() => setShowAddUser(true)} className="btn-primary btn-sm">
+                <Plus className="w-3.5 h-3.5" /> Add User
+              </button>
+            </div>
+          ) : (
+            <div className="bg-white border border-[#e5e5e5] rounded-xl p-5" style={{ boxShadow: '0 1px 3px rgba(0,0,0,.04)' }}>
+              <div className="flex justify-between items-center mb-4">
+                <div className="text-[13px] font-semibold text-[#111]">Add New User</div>
+                <button onClick={() => setShowAddUser(false)} className="text-xs text-[#777] hover:text-[#111]">Cancel</button>
+              </div>
+              <form onSubmit={handleAddUser} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="label">Full Name</label>
+                    <input required value={newUser.name} onChange={e => setNewUser({ ...newUser, name: e.target.value })} className="input" placeholder="e.g. John Smith" />
+                  </div>
+                  <div>
+                    <label className="label">Email</label>
+                    <input required type="email" value={newUser.email} onChange={e => setNewUser({ ...newUser, email: e.target.value })} className="input" placeholder="john@company.com" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="label">Temporary Password</label>
+                    <input required minLength={8} type="password" value={newUser.password} onChange={e => setNewUser({ ...newUser, password: e.target.value })} className="input" placeholder="Min 8 characters" />
+                  </div>
+                  <div>
+                    <label className="label">Role</label>
+                    <select required value={newUser.role} onChange={e => setNewUser({ ...newUser, role: e.target.value })} className="input">
+                      <option value="EMPLOYEE">Employee</option>
+                      <option value="MANAGER">Manager</option>
+                      <option value="ADMIN">Admin / HR</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="label">Department</label>
+                    <select value={newUser.departmentId} onChange={e => setNewUser({ ...newUser, departmentId: e.target.value })} className="input">
+                      <option value="">Select Department...</option>
+                      {departments.map(d => (
+                        <option key={d.id} value={d.id}>{d.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  {newUser.role === 'EMPLOYEE' && (
+                    <div>
+                      <label className="label">Manager (Optional)</label>
+                      <select value={newUser.managerId} onChange={e => setNewUser({ ...newUser, managerId: e.target.value })} className="input">
+                        <option value="">No Manager</option>
+                        {managers.map(m => (
+                          <option key={m.id} value={m.id}>{m.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+                <div className="pt-2">
+                  <button type="submit" disabled={isAdding} className="btn-primary w-full justify-center">
+                    {isAdding ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Create User Account'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          <div className="bg-white border border-[#e5e5e5] rounded-xl overflow-hidden" style={{ boxShadow: '0 1px 3px rgba(0,0,0,.04)' }}>
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-[#f2f2f2]">
+                  {['Name', 'Email', 'Role', 'Department'].map(h => <th key={h} className="table-header">{h}</th>)}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {users.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="table-cell text-center text-[#777] py-6">No users found.</td>
+                  </tr>
+                )}
+                {users.map(u => (
+                  <tr key={u.id} className="hover:bg-[#fafafa]">
+                    <td className="table-cell font-medium text-[#111]">{u.name}</td>
+                    <td className="table-cell text-[#777]">{u.email}</td>
+                    <td className="table-cell"><span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${u.role === 'ADMIN' ? 'bg-[#111] text-white border-[#111]' : u.role === 'MANAGER' ? 'bg-[#f8f8f8] text-[#444] border-[#e5e5e5]' : 'bg-[#f2f2f2] text-[#777] border-[#e5e5e5]'}`}>{u.role.toLowerCase()}</span></td>
+                    <td className="table-cell text-[#777]">{u.department?.name || '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
-      {/* Escalations */}
       {tab === 'escalations' && (
         <div className="space-y-4">
           <div className="bg-white border border-[#e5e5e5] rounded-xl overflow-hidden" style={{ boxShadow: '0 1px 3px rgba(0,0,0,.04)' }}>
@@ -118,7 +229,6 @@ export default function SettingsClient({ cycles, users, escalations }: Props) {
         </div>
       )}
 
-      {/* Shared goals */}
       {tab === 'shared' && (
         <div className="bg-white border border-[#e5e5e5] rounded-xl p-5" style={{ boxShadow: '0 1px 3px rgba(0,0,0,.04)' }}>
           <div className="text-[13px] font-semibold text-[#111] mb-4">Push shared goal to team</div>
@@ -132,9 +242,9 @@ export default function SettingsClient({ cycles, users, escalations }: Props) {
               <label className="label">Target department</label>
               <select value={sharedDept} onChange={e => setSharedDept(e.target.value)} className="input">
                 <option value="ALL">All Departments</option>
-                <option value="Engineering">Engineering</option>
-                <option value="Sales">Sales</option>
-                <option value="Marketing">Marketing</option>
+                {departments.map(d => (
+                  <option key={d.id} value={d.name}>{d.name}</option>
+                ))}
               </select>
             </div>
             <button onClick={() => { if (!sharedGoalTitle) { toast.error('Enter a goal title'); return } toast.success(`Shared goal pushed to ${sharedDept === 'ALL' ? 'all departments' : sharedDept}`) }}

@@ -8,7 +8,7 @@ import { toast } from 'sonner'
 import {
   LayoutDashboard, Target, CalendarCheck, BarChart2, Sparkles,
   ClipboardCheck, Users, ShieldCheck, Settings, LogOut,
-  ChevronLeft, ChevronRight, Menu
+  ChevronLeft, ChevronRight, Menu, User as UserIcon
 } from 'lucide-react'
 import { NotificationBell } from '@/components/ui/NotificationBell'
 import type { User } from '@/types'
@@ -25,6 +25,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/analytics', label: 'Analytics', icon: BarChart2, roles: ['EMPLOYEE', 'MANAGER', 'ADMIN'] },
   { href: '/audit', label: 'Audit Log', icon: ShieldCheck, roles: ['ADMIN', 'MANAGER'] },
   { href: '/settings', label: 'Settings', icon: Settings, roles: ['ADMIN'] },
+  { href: '/profile', label: 'Profile', icon: UserIcon, roles: ['EMPLOYEE', 'MANAGER', 'ADMIN'] },
   { href: '/ai', label: 'AI Insights', icon: Sparkles, roles: ['EMPLOYEE', 'MANAGER', 'ADMIN'] },
 ]
 

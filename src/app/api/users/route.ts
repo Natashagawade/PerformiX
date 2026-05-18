@@ -42,12 +42,20 @@ export async function POST(req: NextRequest) {
     const existing = await prisma.user.findUnique({ where: { email: parsed.data.email } })
     if (existing) return NextResponse.json({ error: 'Email already registered' }, { status: 409 })
 
-    const { password, ...rest } = parsed.data
+    const { password, departmentId, managerId, ...rest } = parsed.data
     const newUser = await prisma.user.create({
-      data: { ...rest, passwordHash: await hashPassword(password) },
+      data: { 
+        ...rest, 
+        passwordHash: await hashPassword(password),
+        departmentId: departmentId || undefined,
+        managerId: managerId || undefined,
+      },
       include: { department: true },
     })
     const { passwordHash: _, ...safe } = newUser
     return NextResponse.json({ data: safe }, { status: 201 })
-  } catch { return NextResponse.json({ error: 'Internal server error' }, { status: 500 }) }
+  } catch (err) {
+    console.error('Error creating user:', err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }

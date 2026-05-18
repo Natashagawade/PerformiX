@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 import { Save, Loader2 } from 'lucide-react'
+import confetti from 'canvas-confetti'
 import { calculateProgress, getProgressBarClass } from '@/lib/utils'
 import type { Goal } from '@/types'
 
@@ -49,6 +50,12 @@ export default function CheckinsClient({ goals, activeCycle }: Props) {
         }),
       })
       if (!res.ok) throw new Error()
+      
+      const pct = calculateProgress(v.achieved, goal.target, goal.uom)
+      if (pct >= 100) {
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#111111', '#16a34a', '#b45309'] })
+      }
+      
       toast.success('Check-in saved')
       router.refresh()
     } catch { toast.error('Failed to save check-in') }
@@ -62,7 +69,6 @@ export default function CheckinsClient({ goals, activeCycle }: Props) {
         <p className="text-[12px] text-[#aaa] mt-1">Track your achievement against targets each quarter</p>
       </div>
 
-      {/* Quarter selector */}
       <div className="grid grid-cols-4 gap-3 mb-5">
         {QUARTERS.map(({ q, period }) => {
           const isActive = q === activePhase
@@ -86,7 +92,6 @@ export default function CheckinsClient({ goals, activeCycle }: Props) {
         })}
       </div>
 
-      {/* Check-in table */}
       <div className="bg-white border border-[#e5e5e5] rounded-xl overflow-hidden" style={{ boxShadow: '0 1px 3px rgba(0,0,0,.04)' }}>
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#f2f2f2]">
           <div>

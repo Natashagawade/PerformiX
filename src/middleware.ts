@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const PUBLIC_PATHS = ['/auth/login', '/auth/forgot-password', '/api/auth/login', '/api/auth/google']
+const PUBLIC_PATHS = [
+  '/auth/login',
+  '/auth/setup',
+  '/auth/forgot-password',
+  '/api/auth/login',
+  '/api/auth/google',
+  '/api/auth/callback',
+  '/api/auth/setup',
+  '/api/auth/me',
+]
 
 const ROLE_PATHS: Record<string, string[]> = {
   '/approvals': ['MANAGER', 'ADMIN'],
