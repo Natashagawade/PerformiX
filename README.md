@@ -1,205 +1,293 @@
-# PerformiX — Enterprise Goal Management Platform
+# PerformiX 🚀  
+### AI-Powered Enterprise Goal Setting & Performance Management Platform
 
-> A polished, production-ready enterprise SaaS platform for goal setting, quarterly check-ins, AI-powered insights, and org-wide performance tracking.
+PerformiX is a modern enterprise-grade SaaS platform designed to streamline employee goal management, approvals, quarterly performance tracking, analytics, reporting, and audit workflows through intelligent automation and scalable architecture.
 
-![PerformiX](https://img.shields.io/badge/PerformiX-v1.0-black?style=flat-square)
-![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue?style=flat-square)
-![Prisma](https://img.shields.io/badge/Prisma-5.22-teal?style=flat-square)
+Built for the **ATOMQUEST Hackathon 1.0**, the platform combines secure role-based workflows with AI-assisted productivity features to create a complete enterprise performance management solution.
 
 ---
 
-## 🏗️ Architecture
+# 🌐 Live Demo
 
-```
-performix/
-├── src/
-│   ├── app/                   # Next.js 15 App Router pages
-│   │   ├── auth/login/        # Login page
-│   │   ├── dashboard/         # Role-specific dashboards
-│   │   ├── goals/             # Employee goal management
-│   │   ├── approvals/         # Manager approval workflow
-│   │   ├── checkins/          # Quarterly check-ins
-│   │   ├── analytics/         # Recharts analytics
-│   │   ├── team/              # Team overview
-│   │   ├── audit/             # Audit log (Admin/Manager)
-│   │   ├── settings/          # Admin configuration
-│   │   ├── ai/                # GoalIQ AI insights
-│   │   └── api/               # REST API routes
-│   ├── components/
-│   │   ├── layout/            # AppShell (sidebar + topbar)
-│   │   ├── dashboard/         # Dashboard components
-│   │   ├── goals/             # Goal CRUD + approvals
-│   │   └── charts/            # Recharts analytics
-│   ├── lib/
-│   │   ├── prisma.ts          # Prisma client singleton
-│   │   ├── auth.ts            # JWT auth utilities
-│   │   └── utils.ts           # Helpers, calculations
-│   ├── types/index.ts         # TypeScript types
-│   └── styles/globals.css     # Design system
-├── prisma/
-│   ├── schema.prisma          # Database schema
-│   └── seed.ts                # Demo data seeder
-└── package.json
+## 🔗 Deployed Application
+https://performi-x.vercel.app/
+
+---
+
+# 👨‍💻 Demo Credentials
+
+## Admin (Full Access & Settings)
+
+| Role | Email | Password |
+|---|---|---|
+| Admin / HR | admin@performix.com | admin123 |
+
+---
+
+## Managers (Team Analytics & Approvals)
+
+| Role | Email | Password |
+|---|---|---|
+| Sales Manager | manager@performix.com | manager123 |
+| Engineering Lead | eng.manager@performix.com | manager123 |
+
+---
+
+## Employees (Goal Creation & Check-ins)
+
+| Role | Email | Password |
+|---|---|---|
+| Sales Representative 1 | employee@performix.com | employee123 |
+| Sales Representative 2 | sales2@performix.com | employee123 |
+| Developer 1 | dev1@performix.com | employee123 |
+| Developer 2 | dev2@performix.com | employee123 |
+| Marketing Executive | marketing@performix.com | employee123 |
+
+---
+
+# ✨ Key Features
+
+## 👥 Role-Based Access Control (RBAC)
+
+The platform supports three enterprise user roles:
+
+### Employee
+- Create and manage goals
+- Submit quarterly check-ins
+- Track personal analytics
+- View manager feedback
+
+### Manager
+- Approve/reject employee goals
+- Monitor team performance
+- Export reports
+- Review quarterly updates
+
+### Admin / HR
+- Organization-wide analytics
+- User management
+- Audit log tracking
+- Department reporting
+
+---
+
+# 🤖 GoalIQ AI Assistant
+
+PerformiX integrates an AI-powered productivity engine called **GoalIQ**.
+
+### AI Capabilities
+- SMART goal generation
+- KPI recommendations
+- Goal quality analysis
+- Intelligent performance summaries
+- AI-powered productivity suggestions
+
+### Example
+
+**Input:**  
+> Improve sales performance
+
+**AI Output:**  
+> Increase quarterly sales conversion rate by 15% through CRM optimization and targeted lead tracking initiatives by Q3.
+
+---
+
+# 📊 Analytics Dashboard
+
+Interactive dashboards provide:
+- Team performance analytics
+- Goal completion tracking
+- Quarterly trend visualization
+- Department insights
+- Productivity monitoring
+
+---
+
+# 📁 Reporting System
+
+Enterprise-grade reporting capabilities include:
+- CSV exports
+- Analytics reports
+- Department reports
+- Audit-ready exports
+
+---
+
+# 🔐 Authentication & Security
+
+Implemented security systems:
+- JWT Authentication
+- Google OAuth
+- Protected Routes
+- Session Management
+- Middleware Authorization
+
+---
+
+# 🏗️ System Architecture
+
+```text
+                    ┌──────────────────────────────┐
+                    │          Frontend            │
+                    │   Next.js 15 + React UI     │
+                    │   TailwindCSS + TypeScript  │
+                    └──────────────┬───────────────┘
+                                   │
+                                   ▼
+                    ┌──────────────────────────────┐
+                    │         API Layer            │
+                    │    Next.js API Routes        │
+                    │ Authentication Middleware    │
+                    └──────────────┬───────────────┘
+                                   │
+        ┌──────────────────────────┼──────────────────────────┐
+        │                          │                          │
+        ▼                          ▼                          ▼
+
+┌────────────────┐     ┌────────────────────┐     ┌────────────────────┐
+│ PostgreSQL DB  │     │   Anthropic AI     │     │   Google OAuth     │
+│ Prisma ORM     │     │   GoalIQ Engine    │     │   Authentication   │
+└────────────────┘     └────────────────────┘     └────────────────────┘
 ```
 
 ---
 
-## 🚀 Quick Start
+# ⚙️ Technology Stack
 
-### 1. Clone and install
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js 15 + React + TypeScript |
+| Styling | TailwindCSS + shadcn/ui |
+| Backend | Next.js API Routes |
+| Database | PostgreSQL (Neon) |
+| ORM | Prisma ORM |
+| Authentication | JWT + Google OAuth |
+| AI Integration | Claude API |
+| Analytics | Recharts |
+| Deployment | Vercel |
+
+---
+
+# 🔄 Workflow
+
+```text
+Employee Login
+      ↓
+Create Goals
+      ↓
+GoalIQ AI Suggestions
+      ↓
+Submit Goals
+      ↓
+Manager Approval
+      ↓
+Quarterly Check-ins
+      ↓
+Analytics Dashboard Updates
+      ↓
+CSV Reports & Audit Logs
+```
+---
+
+# 🚀 Local Setup
+
+## 1. Clone Repository
 
 ```bash
-git clone <repo>
+git clone https://github.com/yourusername/performix.git
+```
+
+---
+
+## 2. Navigate to Project
+
+```bash
 cd performix
+```
+
+---
+
+## 3. Install Dependencies
+
+```bash
 npm install
 ```
 
-### 2. Set up environment
+---
 
-```bash
-cp .env.example .env.local
-# Fill in DATABASE_URL and JWT_SECRET
+## 4. Configure Environment Variables
+
+Create a `.env` file:
+
+```env
+DATABASE_URL=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+JWT_SECRET=
+ANTHROPIC_API_KEY=
 ```
 
-### 3. Set up database
+---
+
+## 5. Run Database Migration
 
 ```bash
-npm run db:generate   # Generate Prisma client
-npm run db:push       # Push schema to database
-npm run db:seed       # Seed demo accounts + data
+npx prisma migrate dev
 ```
 
-### 4. Run development server
+---
+
+## 6. Start Development Server
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+---
+
+# 🎯 Business Impact
+
+PerformiX helps organizations:
+- Improve productivity tracking
+- Centralize performance management
+- Reduce HR operational overhead
+- Enable AI-assisted decision-making
+- Streamline reporting and compliance
 
 ---
 
-## 👤 Demo Accounts
+# 📌 Future Enhancements
 
-| Role | Email | Password |
-|------|-------|----------|
-| Employee | `employee@performix.com` | `GoalSync123` |
-| Manager | `manager@performix.com` | `GoalSync123` |
-| Admin / HR | `admin@performix.com` | `GoalSync123` |
-
----
-
-## ✨ Feature Overview
-
-### 🔐 Authentication
-- JWT-based session auth with HTTP-only cookies
-- Bcrypt password hashing
-- Middleware route protection per role
-- Role-based sidebar navigation
-
-### 👤 Employee
-- Create goals with AI-powered GoalIQ generator
-- Weightage validation (min 10%, total 100%, max 8 goals)
-- Submit goals for approval
-- Quarterly check-in updates (Q1–Q4)
-- Personal analytics with Recharts
-
-### 👥 Manager
-- Approve / Reject / Return goals with comments
-- Team completion heatmap
-- Quarterly check-in oversight
-- Team drill-down analytics
-
-### 🔧 Admin / HR
-- Organization-wide analytics
-- Department completion charts
-- User management table
-- Cycle management (create, activate, close)
-- Escalation rule monitoring
-- Shared goal push to departments
-- Full audit log with export
-
-### 🤖 GoalIQ AI Assistant
-- Conversational AI powered by Claude (claude-sonnet-4)
-- AI goal generator from vague input
-- Goal health analysis
-- Risk identification
-- Q2 summary drafting
-- Completion forecasting
-- Persistent conversation context
+- Predictive analytics
+- Microsoft Teams integration
+- Advanced AI forecasting
+- HRMS integrations
+- Real-time notifications
 
 ---
 
-## 🎨 Design System
+# 🏆 Hackathon Submission
 
-**Color palette:**
-- Background: `#ffffff` / `#f8f8f8`
-- Primary text: `#111111`
-- Secondary text: `#444444`
-- Muted: `#777777` / `#aaaaaa`
-- Border: `#e5e5e5` / `#d4d4d4`
-- Success: `#16a34a`
-- Warning: `#b45309`
-- Danger: `#dc2626`
+Submitted for:
 
-**Inspired by:** Linear, Vercel, Notion, Stripe Dashboard
+## ATOMQUEST Hackathon 1.0
 
 ---
 
-## 🛠️ Tech Stack
+# 👩‍💻 Developer
 
-| Layer | Technology |
-|-------|-----------|
-| Framework | Next.js 15 (App Router) |
-| Language | TypeScript 5.6 |
-| Styling | Tailwind CSS |
-| Animation | Framer Motion |
-| Database | PostgreSQL (Neon/Supabase) |
-| ORM | Prisma 5 |
-| Auth | JWT + bcryptjs |
-| Charts | Recharts |
-| Forms | React Hook Form + Zod |
-| AI | Anthropic Claude API |
-| Notifications | Sonner |
-| Icons | Lucide React |
+### Natasha Amrut Gawade
+
+- GitHub: https://github.com/Natashagawade
+- LinkedIn: https://www.linkedin.com/in/natashagawade/
 
 ---
 
-## 📊 Database Schema
+# ⭐ Final Note
 
-Core models:
-- `User` — with roles (EMPLOYEE, MANAGER, ADMIN)
-- `Department` — org structure
-- `Cycle` — goal setting cycles (FY2025, etc.)
-- `Goal` — individual/shared goals with full lifecycle
-- `CheckIn` — quarterly Q1–Q4 achievement tracking
-- `Notification` — in-app notification system
-- `AuditLog` — full action history
-- `Escalation` — configurable escalation chains
-
----
-
-## 🚢 Deployment
-
-### Vercel (recommended)
-```bash
-vercel deploy
-# Set env vars in Vercel dashboard
-```
-
-### Docker
-```dockerfile
-FROM node:20-alpine
-WORKDIR /app
-COPY . .
-RUN npm ci && npm run build
-EXPOSE 3000
-CMD ["npm", "start"]
-```
-
----
-
-## 📄 License
-
-MIT — Built for PerformiX Enterprise Goal Platform
+PerformiX demonstrates the implementation of a scalable enterprise SaaS platform combining:
+- secure role-based workflows,
+- AI-powered automation,
+- analytics visualization,
+- modern UI/UX,
+- and production-ready architecture.
