@@ -3,10 +3,5 @@
   "devCommand": "next dev",
   "installCommand": "npm install",
   "framework": "nextjs",
-  "outputDirectory": ".next",
-  "env": {
-    "DATABASE_URL": "@performix-database-url",
-    "JWT_SECRET": "@performix-jwt-secret",
-    "ANTHROPIC_API_KEY": "@performix-anthropic-key"
-  }
+  "outputDirectory": ".next"
 }
